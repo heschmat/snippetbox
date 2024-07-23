@@ -2,8 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
+	"text/template"
 )
 
 // mimicks a priliminary db
@@ -16,7 +18,23 @@ var snippets = []map[string]interface{} {
 // containing "Hello from Snippetbox" as the response body.
 func home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Server", "Go") // customize header
-	w.Write([]byte("Hello from Snippetbox\n"))
+
+	// Read the template file into a template set.
+	ts, err := template.ParseFiles("./ui/html/pages/home.tmpl.html")
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	// Write the template content as the response body.
+	// As we don't have any `dynamic data` to pass, we assign `nil` to the last parameter.
+	err = ts.Execute(w, nil)
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
+	// w.Write([]byte("Hello from Snippetbox\n"))
 }
 
 func snippetView(w http.ResponseWriter, r *http.Request) {
