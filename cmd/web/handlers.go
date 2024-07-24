@@ -19,17 +19,24 @@ var snippets = []map[string]interface{} {
 func home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Server", "Go") // customize header
 
+	// Initialize a slice containing the paths to the two `tmpl` files.
+	files := []string{
+		"./ui/html/base.tmpl.html",
+		"./ui/html/pages/home.tmpl.html",
+	}
+
 	// Read the template file into a template set.
-	ts, err := template.ParseFiles("./ui/html/pages/home.tmpl.html")
+	ts, err := template.ParseFiles(files...)
 	if err != nil {
 		log.Print(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError) // status code 500
 		return
 	}
 
 	// Write the template content as the response body.
 	// As we don't have any `dynamic data` to pass, we assign `nil` to the last parameter.
-	err = ts.Execute(w, nil)
+	// err = ts.Execute(w, nil)
+	err = ts.ExecuteTemplate(w, "base", nil) // `base` then invokes `title` & `main` templates.
 	if err != nil {
 		log.Print(err.Error())
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
