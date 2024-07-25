@@ -19,10 +19,12 @@ var snippets = []map[string]interface{} {
 func home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Server", "Go") // customize header
 
-	// Initialize a slice containing the paths to the two `tmpl` files.
+	// Initialize a slice containing the paths to the `tmpl` files.
 	files := []string{
 		"./ui/html/base.tmpl.html",
 		"./ui/html/pages/home.tmpl.html",
+		"./ui/html/partials/nav.tmpl.html",
+
 	}
 
 	// Read the template file into a template set.

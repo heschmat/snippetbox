@@ -10,7 +10,11 @@
     <header>
       <h1><a href="/">Snippetbox</a></h1>
     </header>
-    <main>{{template "main" .}}</main>
+    {{template "nav" .}}
+    <main>
+      <!-- Invoke the `main template.-->
+      {{template "main" .}}
+    </main>
     <footer>Powered by <a href="https://golang.org">Go</a></footer>
   </body>
 </html>
