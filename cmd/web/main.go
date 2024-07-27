@@ -7,6 +7,14 @@ import (
 
 func main() {
 	mux := http.NewServeMux() // Initialize a new servemux
+
+	fileServer := http.FileServer(http.Dir("./ui/static"))
+	// the following gives you `404 page not found`
+	// when visting: http://localhost:4000/static/
+	// mux.Handle("GET /static/", fileServer)
+	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
+
+
 	// Register the `home` func as the handler for the "/" URL pattern.
 	// Restrict this route to exact matches on "/" only, using {$}
 	mux.HandleFunc("GET /{$}", home)
