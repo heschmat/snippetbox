@@ -1,11 +1,22 @@
 package main
 
 import (
-	"log"
+	"flag"
+	"log/slog"
 	"net/http"
+	"os"
 )
 
 func main() {
+	// Define a new command-line flag with the name `addr`
+	// flag.String() return a pointer to the flag value.
+	addr := flag.String("addr", ":4000", "HTTP network address")
+	flag.Parse()
+
+	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		AddSource: true,
+	}))
+
 	mux := http.NewServeMux() // Initialize a new servemux
 
 	fileServer := http.FileServer(http.Dir("./ui/static"))
@@ -22,9 +33,15 @@ func main() {
 	mux.HandleFunc("GET /snippet/create", snippetCreate) // shows the form
 	mux.HandleFunc("POST /snippet/create", snippetCreatePost) //
 
-	log.Print("Starting server on :4000")
+	// log.Printf("Starting server on %s", *addr)
+	logger.Info("starting server", "addr", *addr)
 
-	err := http.ListenAndServe(":4000", mux)
-	log.Fatal(err) // Log the error message & exit. 
+	// now we can specify the port manually: 
+	// $ go run ./cmd/web -addr=":3000"
+	err := http.ListenAndServe(*addr, mux)
+	// log.Fatal(err) // Log the error message & exit. 
 	// N.B. Any error returned by `http.ListenAndServe()` is always `non-nil`
+
+	logger.Error(err.Error())
+	os.Exit(1)
 }
