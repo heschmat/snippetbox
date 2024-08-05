@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"text/template"
@@ -51,7 +52,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		app.serverError(w, r, err)
 	}
-	
+
 	// w.Write([]byte("Hello from Snippetbox\n"))
 }
 
@@ -98,6 +99,15 @@ func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 
 
 func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusCreated) // 201 status code
-	w.Write([]byte("Save a new snippet...\n"))
+	// Use dummy data for now.
+	title := "O snail"
+	content := "O snail, slow and still,\nOn the leaf's edge, morning dew—\nTime's gentle whisper."
+	expires := 7
+
+	id, err := app.snippets.Insert(title, content, expires)
+	if err != nil {
+		app.serverError(w, r, err)
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
 }
