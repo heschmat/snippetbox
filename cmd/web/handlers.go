@@ -31,20 +31,27 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	ts, err := template.ParseFiles(files...)
 	// Because the `home()` handler is a method against the application struct
 	// it can access its fields, including the structured logger.
+	// if err != nil {
+	// 	app.logger.Error(err.Error(), "method", r.Method, "uri", r.URL.RequestURI())
+	// 	http.Error(w, "Internal Server Error", http.StatusInternalServerError) // status code 500
+	// 	return
+	// }
 	if err != nil {
-		app.logger.Error(err.Error(), "method", r.Method, "uri", r.URL.RequestURI())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError) // status code 500
-		return
+		app.serverError(w, r, err)
 	}
 
 	// Write the template content as the response body.
 	// As we don't have any `dynamic data` to pass, we assign `nil` to the last parameter.
 	// err = ts.Execute(w, nil)
 	err = ts.ExecuteTemplate(w, "base", nil) // `base` then invokes `title` & `main` templates.
+	// if err != nil {
+	// 	app.logger.Error(err.Error(), "method", r.Method, "uri", r.URL.RequestURI())
+	// 	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	// }
 	if err != nil {
-		app.logger.Error(err.Error(), "method", r.Method, "uri", r.URL.RequestURI())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		app.serverError(w, r, err)
 	}
+	
 	// w.Write([]byte("Hello from Snippetbox\n"))
 }
 
