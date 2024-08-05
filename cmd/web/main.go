@@ -7,6 +7,11 @@ import (
 	"os"
 )
 
+// Hold the applicatin-wide dependencies for the web app.
+type application struct {
+	logger *slog.Logger
+}
+
 func main() {
 	// Define a new command-line flag with the name `addr`
 	// flag.String() return a pointer to the flag value.
@@ -16,6 +21,11 @@ func main() {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 		AddSource: true,
 	}))
+
+	// Initialize a new instance of the application struct, containing the dependencies.
+	app := &application{
+		logger: logger,
+	}
 
 	mux := http.NewServeMux() // Initialize a new servemux
 
@@ -28,10 +38,10 @@ func main() {
 
 	// Register the `home` func as the handler for the "/" URL pattern.
 	// Restrict this route to exact matches on "/" only, using {$}
-	mux.HandleFunc("GET /{$}", home)
-	mux.HandleFunc("GET /snippet/view/{id}", snippetView)
-	mux.HandleFunc("GET /snippet/create", snippetCreate) // shows the form
-	mux.HandleFunc("POST /snippet/create", snippetCreatePost) //
+	mux.HandleFunc("GET /{$}", app.home)
+	mux.HandleFunc("GET /snippet/view/{id}", app.snippetView)
+	mux.HandleFunc("GET /snippet/create", app.snippetCreate) // shows the form
+	mux.HandleFunc("POST /snippet/create", app.snippetCreatePost) //
 
 	// log.Printf("Starting server on %s", *addr)
 	logger.Info("starting server", "addr", *addr)
