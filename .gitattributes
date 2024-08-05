@@ -1,0 +1,6 @@
+*.css linguist-vendored
+*.html linguist-vendored
+
+* text=auto
+*.sh eol=lf
+*.bat eol=crlf
