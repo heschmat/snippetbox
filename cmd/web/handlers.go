@@ -1,22 +1,18 @@
 package main
 
 import (
-	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
 	"text/template"
-)
 
-// mimicks a priliminary db
-var snippets = []map[string]interface{} {
-	{"id": 21, "text": "learning Go is fun."},
-	{"id": 27, "text": "Go Go Go"},
-}
+	"github.com/heschmat/snippetbox/internal/models"
+)
 
 // Define a home handler function which writes a byte slice
 // containing "Hello from Snippetbox" as the response body.
-// NOTE: 
+// NOTE:
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Server", "Go") // customize header
 
@@ -68,28 +64,18 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Find the snippet with the matching id:
-	var snippet map[string]interface{}
-	for _, s := range snippets {
-		if s["id"].(int) == id {
-			snippet = s
-			break
+	snippet, err := app.snippets.Get(id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			http.NotFound(w, r)
+		} else {
+			app.serverError(w, r, err)
 		}
+		return 
 	}
 
-	if snippet == nil {
-		http.NotFound(w, r)
-		return
-	}
-
-	// msg := fmt.Sprintf("Display a specific snippet with ID: %d\n", id)
-	// w.Write([]byte(msg))
-	// fmt.Fprintf(w, "Display a specific snippet with ID: %d\n", id)
-	
-	w.Header().Set("Content-Type", "application/json")
-	// fmt.Fprintf(w, `{"id", "%d", "name": "Lucy"}`, id)
-
-	json.NewEncoder(w).Encode(snippet)
+	// Write the snippet data as a plain-text HTTP response body:
+	fmt.Fprintf(w, "%+v", snippet)
 }
 
 
